@@ -8,3 +8,7 @@ output "terraform_runner_emails" {
   value       = module.github_workload_identity.terraform_runner_emails
 }
 
+output "deploy_staging_email" {
+  description = "GitHub Actions deployer service account for QA/staging."
+  value       = google_service_account.deploy_staging.email
+}

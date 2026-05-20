@@ -23,6 +23,12 @@ variable "github_repository" {
   type        = string
 }
 
+variable "additional_github_repositories" {
+  description = "Additional owner/repository values allowed by the provider condition."
+  type        = list(string)
+  default     = []
+}
+
 variable "terraform_runners" {
   description = "Terraform runner service accounts keyed by environment."
   type = map(object({
@@ -38,4 +44,3 @@ variable "state_bucket_names" {
   type        = map(string)
   default     = {}
 }
-

@@ -1,5 +1,7 @@
 locals {
-  repository = "${var.github_owner}/${var.github_repository}"
+  repository           = "${var.github_owner}/${var.github_repository}"
+  allowed_repositories = distinct(concat([local.repository], var.additional_github_repositories))
+  repository_condition = join(" || ", [for repository in local.allowed_repositories : "assertion.repository == '${repository}'"])
 }
 
 resource "google_iam_workload_identity_pool" "this" {
@@ -24,7 +26,7 @@ resource "google_iam_workload_identity_pool_provider" "github" {
     "attribute.ref"        = "assertion.ref"
   }
 
-  attribute_condition = "assertion.repository_owner == '${var.github_owner}' && assertion.repository == '${local.repository}'"
+  attribute_condition = "assertion.repository_owner == '${var.github_owner}' && (${local.repository_condition})"
 
   oidc {
     issuer_uri = "https://token.actions.githubusercontent.com"
@@ -63,7 +65,7 @@ resource "google_service_account_iam_member" "github_impersonation" {
 
   service_account_id = google_service_account.terraform_runner[each.key].name
   role               = "roles/iam.workloadIdentityUser"
-  member             = "principalSet://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/attribute.ref/${each.value.ref}"
+  member             = "principal://iam.googleapis.com/${google_iam_workload_identity_pool.this.name}/subject/repo:${local.repository}:ref:${each.value.ref}"
 }
 
 resource "google_storage_bucket_iam_member" "state_access" {
