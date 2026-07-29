@@ -6,7 +6,8 @@ locals {
   }
 
   backend_runtime_sa   = "resumai-backend@${var.project_id}.iam.gserviceaccount.com"
-  cloud_run_runtime_sa = "367288272676-compute@developer.gserviceaccount.com"
+  cloud_run_runtime_sa = "cloud-run-staging-runtime@${var.project_id}.iam.gserviceaccount.com"
+  deploy_staging_sa    = "deploy-staging@${var.project_id}.iam.gserviceaccount.com"
 }
 
 module "backend_runtime_sa" {
@@ -16,6 +17,20 @@ module "backend_runtime_sa" {
   account_id   = "resumai-backend"
   display_name = "resumai-backend"
   description  = "Service account for ResumAI backend to upload and download resumes from GCS"
+}
+
+module "cloud_run_runtime_sa" {
+  source = "../../modules/iam_service_account"
+
+  project_id   = var.project_id
+  account_id   = "cloud-run-staging-runtime"
+  display_name = "Cloud Run staging runtime"
+}
+
+resource "google_service_account_iam_member" "deploy_staging_runtime_user" {
+  service_account_id = module.cloud_run_runtime_sa.name
+  role               = "roles/iam.serviceAccountUser"
+  member             = "serviceAccount:${local.deploy_staging_sa}"
 }
 
 module "github_actions_sa" {
@@ -45,6 +60,10 @@ module "resumes_bucket" {
     backend_object_viewer = {
       role   = "roles/storage.objectViewer"
       member = "serviceAccount:${local.backend_runtime_sa}"
+    }
+    cloud_run_object_admin = {
+      role   = "roles/storage.objectAdmin"
+      member = "serviceAccount:${local.cloud_run_runtime_sa}"
     }
   }
 }

@@ -7,7 +7,7 @@ Inventory captured from project `resumai-platform` in region `asia-southeast1`.
 | Resource | Value |
 | --- | --- |
 | Service | `test-service` |
-| Runtime service account | `367288272676-compute@developer.gserviceaccount.com` |
+| Runtime service account | `cloud-run-staging-runtime@resumai-platform.iam.gserviceaccount.com` |
 | Image | `gcr.io/resumai-platform/backend-test:5cee408999ed50730c7e3e4cb277b200d267aed5` |
 | Max scale | `3` |
 | App version | `QA` |
@@ -28,21 +28,23 @@ Bucket IAM members imported for the backend runtime service account:
 | --- | --- |
 | `roles/storage.objectCreator` | `serviceAccount:resumai-backend@resumai-platform.iam.gserviceaccount.com` |
 | `roles/storage.objectViewer` | `serviceAccount:resumai-backend@resumai-platform.iam.gserviceaccount.com` |
+| `roles/storage.objectAdmin` | `serviceAccount:cloud-run-staging-runtime@resumai-platform.iam.gserviceaccount.com` |
 
 ## Secret Manager
 
 | Secret | Replication | Notes |
 | --- | --- | --- |
-| `gemini-api-key` | automatic | Secret resource only; versions are intentionally not imported |
+| `gemini-api-key` | automatic | Runtime accessor is managed; secret versions are intentionally not imported |
 
 ## Service Accounts
 
 | Service account | Display name | P1 status |
 | --- | --- | --- |
 | `resumai-backend@resumai-platform.iam.gserviceaccount.com` | `resumai-backend` | imported |
+| `cloud-run-staging-runtime@resumai-platform.iam.gserviceaccount.com` | `Cloud Run staging runtime` | imported |
 | `github-actions-sa@resumai-platform.iam.gserviceaccount.com` | `github-actions-sa` | imported |
 | `local-dev-uploader@resumai-platform.iam.gserviceaccount.com` | `local-dev-uploader` | inventoried, not imported |
-| `367288272676-compute@developer.gserviceaccount.com` | Compute Engine default service account | inventoried, not imported |
+| `367288272676-compute@developer.gserviceaccount.com` | Compute Engine default service account | legacy; runtime access removed after migration |
 
 ## Out Of Scope For P1
 
