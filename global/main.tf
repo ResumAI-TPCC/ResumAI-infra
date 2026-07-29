@@ -70,6 +70,7 @@ resource "google_service_account" "deploy_staging" {
 
 resource "google_project_iam_member" "deploy_staging_roles" {
   for_each = toset([
+    "roles/artifactregistry.writer",
     "roles/iam.serviceAccountUser",
     "roles/run.admin",
     "roles/secretmanager.viewer",
