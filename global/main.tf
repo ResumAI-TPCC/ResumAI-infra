@@ -87,3 +87,64 @@ resource "google_service_account_iam_member" "github_deploy_staging" {
   role               = "roles/iam.workloadIdentityUser"
   member             = "principal://iam.googleapis.com/${module.github_workload_identity.pool_name}/subject/repo:${var.github_owner}/ResumAI:ref:refs/heads/develop"
 }
+
+resource "google_service_account" "deploy_prod" {
+  project      = var.project_id
+  account_id   = "deploy-prod"
+  display_name = "Deploy Production"
+  description  = "Keyless GitHub Actions deployer for the ResumAI production Cloud Run service."
+}
+
+resource "google_project_iam_member" "deploy_prod_roles" {
+  for_each = toset([
+    "roles/artifactregistry.writer",
+    "roles/run.admin",
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.deploy_prod.email}"
+}
+
+resource "google_service_account_iam_member" "github_deploy_prod" {
+  service_account_id = google_service_account.deploy_prod.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${module.github_workload_identity.pool_name}/subject/repo:${var.github_owner}/ResumAI:ref:refs/heads/main"
+}
+
+resource "google_service_account" "terraform_plan_readonly" {
+  project      = var.project_id
+  account_id   = "tf-plan-readonly"
+  display_name = "Terraform Plan Read Only"
+  description  = "Read-only GitHub Actions identity for post-merge Terraform plans."
+}
+
+resource "google_project_iam_member" "terraform_plan_readonly_roles" {
+  for_each = toset([
+    "roles/iam.securityReviewer",
+    "roles/secretmanager.viewer",
+    "roles/viewer",
+  ])
+
+  project = var.project_id
+  role    = each.value
+  member  = "serviceAccount:${google_service_account.terraform_plan_readonly.email}"
+}
+
+resource "google_service_account_iam_member" "github_terraform_plan_readonly" {
+  service_account_id = google_service_account.terraform_plan_readonly.name
+  role               = "roles/iam.workloadIdentityUser"
+  member             = "principal://iam.googleapis.com/${module.github_workload_identity.pool_name}/subject/repo:${var.github_owner}/${var.github_repository}:ref:refs/heads/develop"
+}
+
+resource "google_storage_bucket_iam_member" "terraform_plan_state_reader" {
+  for_each = toset([
+    "resumai-infra-tfstate-global",
+    "resumai-infra-tfstate-staging",
+    "resumai-infra-tfstate-prod",
+  ])
+
+  bucket = each.value
+  role   = "roles/storage.objectViewer"
+  member = "serviceAccount:${google_service_account.terraform_plan_readonly.email}"
+}
