@@ -40,5 +40,16 @@ Terraform source of truth for ResumAI GCP infrastructure.
    terraform init
    ```
 
-The environment stacks are intentionally minimal in P0. P1/P2 add module calls and import blocks for live resources.
+Reusable modules currently cover Cloud Run, Cloud SQL for PostgreSQL, Cloud
+Tasks, GCS, Secret Manager, service accounts, additive IAM bindings, and
+Workload Identity Federation.
+
+Existing resources are adopted with declarative `import` blocks. Never run an
+environment apply until its saved plan has been reviewed for unexpected
+deletes or replacements. See `docs/runbook-import.md` and
+`docs/runbook-recovery.md`.
+
+`.github/workflows/terraform-ci.yml` validates every stack on pull requests.
+After a merge to `develop`, a dedicated read-only WIF identity runs unlocked
+plans for global, staging, and prod; any non-empty plan fails the workflow.
 

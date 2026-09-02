@@ -19,3 +19,12 @@ variable "description" {
   default     = null
 }
 
+variable "iam_members" {
+  description = "Additive IAM members on this service account, keyed by a stable name."
+  type = map(object({
+    role   = string
+    member = string
+  }))
+  default = {}
+}
+

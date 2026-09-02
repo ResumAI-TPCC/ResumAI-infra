@@ -8,13 +8,15 @@ Inventory captured from project `resumai-platform` in region `asia-southeast1`.
 | --- | --- |
 | Service | `test-service` |
 | Runtime service account | `cloud-run-staging-runtime@resumai-platform.iam.gserviceaccount.com` |
-| Image | `gcr.io/resumai-platform/backend-test:5cee408999ed50730c7e3e4cb277b200d267aed5` |
+| Image | `gcr.io/resumai-platform/backend-test:dab14e4e02145e4af58a8281d81c375b2b8015f6` |
 | Max scale | `3` |
 | App version | `QA` |
 | Bucket env var | `GCS_BUCKET_NAME=resumai-platform-resumes` |
 | Object prefix env var | `GCS_OBJECT_PREFIX=resumes` |
 
-The current revision template contains plaintext environment values. P1 imports the service but ignores revision template drift so secret values are not committed to Terraform.
+The current revision uses Secret Manager for `GEMINI_API_KEY`. Application CD
+owns revision changes; Terraform imports the service shell and ignores live
+revision-template drift.
 
 ## GCS
 
@@ -52,3 +54,10 @@ Bucket IAM members imported for the backend runtime service account:
 - GCR images.
 - Firebase Hosting resources.
 - Prod resources such as `prod-service` and `prod-resumai-resumes`.
+
+## Absent Services
+
+Cloud SQL Admin and Cloud Tasks APIs are disabled, and Cloud Asset Inventory
+contains no Cloud SQL instance or Cloud Tasks queue. Their reusable modules are
+available, but no staging resources are declared or imported until an
+application requirement and cost approval exist.

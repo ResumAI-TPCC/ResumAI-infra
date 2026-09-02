@@ -88,9 +88,27 @@ module "backend" {
   project_id           = var.project_id
   name                 = "test-service"
   location             = var.region
-  image                = "gcr.io/resumai-platform/backend-test:5cee408999ed50730c7e3e4cb277b200d267aed5"
+  image                = "gcr.io/resumai-platform/backend-test:dab14e4e02145e4af58a8281d81c375b2b8015f6"
   container_name       = "backend-test-1"
   service_account_name = local.cloud_run_runtime_sa
   ingress              = "all"
   max_scale            = "3"
+  port                 = 8000
+
+  environment_variables = {
+    ALLOWED_ORIGINS   = "https://resumai-platform.web.app"
+    APP_VERSION       = "QA"
+    GCP_PROJECT_ID    = var.project_id
+    GCS_BUCKET_NAME   = module.resumes_bucket.name
+    GCS_OBJECT_PREFIX = "resumes"
+    GEMINI_MODEL      = "gemini-3-flash-preview"
+    LLM_PROVIDER      = "gemini"
+  }
+
+  secret_environment_variables = {
+    GEMINI_API_KEY = {
+      secret_name = module.gemini_api_key_secret.secret_id
+      version     = "latest"
+    }
+  }
 }
