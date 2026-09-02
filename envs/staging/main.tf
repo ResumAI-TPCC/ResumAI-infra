@@ -61,6 +61,10 @@ module "resumes_bucket" {
       role   = "roles/storage.objectViewer"
       member = "serviceAccount:${local.backend_runtime_sa}"
     }
+    cloud_run_bucket_reader = {
+      role   = "roles/storage.legacyBucketReader"
+      member = "serviceAccount:${local.cloud_run_runtime_sa}"
+    }
     cloud_run_object_admin = {
       role   = "roles/storage.objectAdmin"
       member = "serviceAccount:${local.cloud_run_runtime_sa}"
