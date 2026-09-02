@@ -98,6 +98,7 @@ resource "google_service_account" "deploy_prod" {
 resource "google_project_iam_member" "deploy_prod_roles" {
   for_each = toset([
     "roles/artifactregistry.writer",
+    "roles/firebasehosting.admin",
     "roles/run.admin",
   ])
 
