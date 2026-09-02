@@ -83,6 +83,13 @@ module "backend" {
   max_scale            = "10"
   port                 = 8000
 
+  # Kept in sync with the live service so a disaster-recovery recreate does not
+  # drop the warm instance. Day-to-day this is a no-op: the module ignores
+  # changes to `template`, so CD remains the owner of the running revision.
+  template_annotations = {
+    "autoscaling.knative.dev/minScale" = "1"
+  }
+
   environment_variables = {
     ALLOWED_ORIGINS   = "https://resumai-application.web.app"
     APP_VERSION       = "1.0.0"
